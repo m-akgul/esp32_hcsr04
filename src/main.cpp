@@ -1,5 +1,9 @@
 #include <Arduino.h>
-#include <ultrasonic.h>
+#include "ultrasonic.h"
+
+constexpr uint32_t ULTRASONIC_INTERVAL_MS = 100;
+
+static uint32_t lastUltrasonicMeasurementTime = 0;
 
 void setup()
 {
@@ -12,17 +16,28 @@ void setup()
 void loop()
 {
 
-    // Ultrasonic
-    static uint32_t lastUltrasonicTime = 0;
+    // Always advance the ultrasonic state machine
+    ultrasonicUpdate();
+    
+
+    // Start a new ultrasonic measurement every 100 ms
     uint32_t currentTime = millis();
 
-    if (currentTime - lastUltrasonicTime >= 100)
+    if (currentTime - lastUltrasonicMeasurementTime >=
+        ULTRASONIC_INTERVAL_MS)
     {
-        lastUltrasonicTime = currentTime;
+        lastUltrasonicMeasurementTime = currentTime;
 
-        float distance = ultrasonicReadDistanceCm();
+        ultrasonicStartMeasurement();
+    }
 
-        if (distance >= 0)
+
+    // Process a completed measurement
+    if (ultrasonicDataAvailable())
+    {
+        float distance = ultrasonicGetDistanceCm();
+
+        if (distance >= 0.0f)
         {
             Serial.print("Distance: ");
             Serial.print(distance);
@@ -30,7 +45,7 @@ void loop()
         }
         else
         {
-            Serial.println("No echo");
+            Serial.println("Ultrasonic timeout");
         }
     }
 }

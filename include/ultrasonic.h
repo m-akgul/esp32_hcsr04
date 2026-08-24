@@ -8,6 +8,12 @@ constexpr uint8_t ULTRASONIC_ECHO_PIN = 25;
 
 void ultrasonicInit();
 
-float ultrasonicReadDistanceCm();
+void ultrasonicUpdate();
+
+bool ultrasonicDataAvailable();
+
+float ultrasonicGetDistanceCm();
+
+void ultrasonicStartMeasurement();
 
 #endif
